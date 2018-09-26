@@ -117,6 +117,7 @@ def make_proposal():
                 title=title
             )
             db.session.add(user)
+            db.session.flush()
 
             avatar_data = team_member.get("avatar")
             if avatar_data:
@@ -128,6 +129,7 @@ def make_proposal():
                 for social_media in social_medias:
                     sm = SocialMedia(social_media_link=social_media.get("link"), user_id=user.id)
                     db.session.add(sm)
+
 
         proposal.team.append(user)
 
