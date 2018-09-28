@@ -31,13 +31,13 @@ class AuthFlow extends React.Component<Props> {
 
   private pages = {
     SIGN_IN: {
-      title: 'Prove your Identity',
-      subtitle: 'Log into your Grant.io account by proving your identity',
+      title: () => 'Prove your Identity',
+      subtitle: () => 'Log into your Grant.io account by proving your identity',
       render: () => <SignIn />,
     },
     SIGN_UP: {
-      title: 'Claim your Identity',
-      subtitle: 'Create a Grant.io account by claiming your identity',
+      title: () => 'Claim your Identity',
+      subtitle: () => 'Create a Grant.io account by claiming your identity',
       render: () => (
         <SignUp
           address={this.state.address}
@@ -47,13 +47,26 @@ class AuthFlow extends React.Component<Props> {
       ),
     },
     SELECT_PROVIDER: {
-      title: 'Provide an Identity',
-      subtitle: 'Sign in or create a new account by selecting your identity provider',
+      title: () => 'Provide an Identity',
+      subtitle: () =>
+        'Sign in or create a new account by selecting your identity provider',
       render: () => <SelectProvider onSelect={this.setProvider} />,
     },
     PROVIDE_IDENTITY: {
-      title: 'Provide an Identity',
-      subtitle: 'Enter your Ethereum Address',
+      title: () => 'Provide an Identity',
+      subtitle: () => {
+        switch (this.state.provider) {
+          case AUTH_PROVIDER.ADDRESS:
+            return 'Enter your Ethereum Address';
+          case AUTH_PROVIDER.LEDGER:
+            return 'Connect with your Ledger';
+          case AUTH_PROVIDER.TREZOR:
+            return 'Connect with your TREZOR';
+          case AUTH_PROVIDER.WEB3:
+            // TODO: Dynamically use web3 name
+            return 'Connect with MetaMask';
+        }
+      },
       render: () => (
         <ProvideIdentity
           provider={this.state.provider}
@@ -92,8 +105,8 @@ class AuthFlow extends React.Component<Props> {
 
     return (
       <div className="AuthFlow">
-        <h1 className="AuthFlow-title">{page.title}</h1>
-        <p className="AuthFlow-subtitle">{page.subtitle}</p>
+        <h1 className="AuthFlow-title">{page.title()}</h1>
+        <p className="AuthFlow-subtitle">{page.subtitle()}</p>
         <div className="AuthFlow-content">{page.render()}</div>
       </div>
     );
