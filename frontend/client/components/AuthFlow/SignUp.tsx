@@ -1,29 +1,44 @@
 import React from 'react';
+import { connect } from 'react-redux';
 import { Form, Input, Button } from 'antd';
 import Identicon from 'components/Identicon';
 import ShortAddress from 'components/ShortAddress';
 import { AUTH_PROVIDER } from 'utils/auth';
+import { authActions } from 'modules/auth';
+import { AppState } from 'store/reducers';
 import './SignUp.less';
 
-interface Props {
+interface StateProps {
+  isCreatingUser: AppState['auth']['isCreatingUser'];
+  createUserError: AppState['auth']['createUserError'];
+}
+
+interface DispatchProps {
+  createUser: typeof authActions['createUser'];
+}
+
+interface OwnProps {
   address: string;
   provider: AUTH_PROVIDER;
 }
+
+type Props = StateProps & DispatchProps & OwnProps;
 
 interface State {
   name: string;
   email: string;
 }
 
-export default class SignUp extends React.PureComponent<Props, State> {
+class SignUp extends React.PureComponent<Props, State> {
   state: State = {
     name: '',
     email: '',
   };
 
   render() {
-    const { address } = this.props;
+    const { address, isCreatingUser } = this.props;
     const { name, email } = this.state;
+
     return (
       <div className="SignUp">
         <div className="SignUp-identity">
@@ -52,7 +67,14 @@ export default class SignUp extends React.PureComponent<Props, State> {
             />
           </Form.Item>
 
-          <Button type="primary" htmlType="submit" size="large" block>
+          {}
+          <Button
+            type="primary"
+            htmlType="submit"
+            size="large"
+            block
+            loading={isCreatingUser}
+          >
             Claim Identity
           </Button>
         </Form>
@@ -66,7 +88,19 @@ export default class SignUp extends React.PureComponent<Props, State> {
   };
 
   private handleSubmit = (ev: React.FormEvent<HTMLFormElement>) => {
+    const { address, createUser } = this.props;
+    const { name, email } = this.state;
     ev.preventDefault();
-    console.log(this.state);
+    createUser(address, name, email);
   };
 }
+
+export default connect<StateProps, DispatchProps, OwnProps, AppState>(
+  state => ({
+    isCreatingUser: state.auth.isCreatingUser,
+    createUserError: state.auth.createUserError,
+  }),
+  {
+    createUser: authActions.createUser,
+  },
+)(SignUp);
