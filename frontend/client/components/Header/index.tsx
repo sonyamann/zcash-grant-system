@@ -70,7 +70,7 @@ class Header extends React.Component<Props> {
         </Link>
 
         <div className="Header-links is-right">
-          <Link to="/auth/sign-in" className="Header-links-link AuthButton">
+          <Link to="/auth" className="Header-links-link AuthButton">
             Sign in
             {avatar && (
               <div className="AuthButton-avatar">

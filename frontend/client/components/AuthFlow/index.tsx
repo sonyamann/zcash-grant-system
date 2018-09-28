@@ -21,11 +21,13 @@ interface State {
   address: string | null;
 }
 
+const DEFAULT_STATE: State = {
+  provider: null,
+  address: null,
+};
+
 class AuthFlow extends React.Component<Props> {
-  state: State = {
-    provider: null,
-    address: null,
-  };
+  state: State = { ...DEFAULT_STATE };
 
   private pages = {
     SIGN_IN: {
@@ -36,20 +38,23 @@ class AuthFlow extends React.Component<Props> {
     SIGN_UP: {
       title: 'Claim your Identity',
       subtitle: 'Create a Grant.io account by claiming your identity',
-      render: () => <SignUp />,
+      render: () => (
+        <SignUp address={this.state.address} provider={this.state.provider} />
+      ),
     },
     SELECT_PROVIDER: {
       title: 'Provide an Identity',
       subtitle: 'Sign in or create a new account by selecting your identity provider',
       render: () => <SelectProvider onSelect={this.setProvider} />,
     },
-    PROVIDE_ADDRESS: {
+    PROVIDE_IDENTITY: {
       title: 'Provide an Identity',
       subtitle: 'Enter your Ethereum Address',
       render: () => (
         <ProvideIdentity
-          onSelectAddress={this.setAddress}
           provider={this.state.provider}
+          onSelectAddress={this.setAddress}
+          resetState={this.resetState}
         />
       ),
     },
@@ -75,7 +80,7 @@ class AuthFlow extends React.Component<Props> {
         // TODO: If address results in user, show SIGN_IN.
         page = this.pages.SIGN_UP;
       } else {
-        page = this.pages.PROVIDE_ADDRESS;
+        page = this.pages.PROVIDE_IDENTITY;
       }
     } else {
       page = this.pages.SELECT_PROVIDER;
@@ -96,6 +101,10 @@ class AuthFlow extends React.Component<Props> {
 
   private setAddress = (address: string) => {
     this.setState({ address });
+  };
+
+  private resetState = () => {
+    this.setState({ ...DEFAULT_STATE });
   };
 }
 
