@@ -8,6 +8,7 @@ const Home = loadable(() => import('pages/index'));
 const Create = loadable(() => import('pages/create'));
 const Proposals = loadable(() => import('pages/proposals'));
 const Proposal = loadable(() => import('pages/proposal'));
+const Auth = loadable(() => import('pages/auth'));
 
 import 'styles/style.less';
 
@@ -19,6 +20,8 @@ class Routes extends React.Component<any> {
         <Route path="/create" component={Create} />
         <Route exact path="/proposals" component={Proposals} />
         <Route path="/proposals/:id" component={Proposal} />
+        <Route path="/auth" component={Auth} />
+        {/* TODO: Replace with 404 */}
         <Route path="/*" render={() => <Redirect to="/" />} />
       </Switch>
     );

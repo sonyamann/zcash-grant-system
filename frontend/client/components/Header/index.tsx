@@ -1,18 +1,54 @@
 import React from 'react';
-import { Icon } from 'antd';
+import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import classnames from 'classnames';
+import { Spin, Icon } from 'antd';
+import Identicon from 'components/Identicon';
+import { web3Actions } from 'modules/web3';
+import { AppState } from 'store/reducers';
 import './style.less';
+
+interface StateProps {
+  web3: AppState['web3']['web3'];
+  accounts: AppState['web3']['accounts'];
+  accountsLoading: AppState['web3']['accountsLoading'];
+  accountsError: AppState['web3']['accountsError'];
+}
+
+interface DispatchProps {
+  setWeb3: typeof web3Actions['setWeb3'];
+  setAccounts: typeof web3Actions['setAccounts'];
+}
 
 interface OwnProps {
   isTransparent?: boolean;
 }
 
-type Props = OwnProps;
+type Props = StateProps & DispatchProps & OwnProps;
 
-export default class Header extends React.Component<Props> {
+class Header extends React.Component<Props> {
+  componentDidMount() {
+    this.props.setWeb3();
+  }
+
+  componentDidUpdate() {
+    const { web3, accounts, accountsLoading, accountsError } = this.props;
+    if (web3 && !accounts.length && !accountsLoading && !accountsError) {
+      this.props.setAccounts();
+    }
+  }
+
   render() {
-    const { isTransparent } = this.props;
+    const { isTransparent, accounts, accountsLoading } = this.props;
+    const isAuthed = false;
+
+    let avatar;
+    if (accounts && accounts[0]) {
+      avatar = <Identicon address={accounts[0]} />;
+    } else if (accountsLoading) {
+      avatar = <Spin />;
+    }
+
     return (
       <div
         className={classnames({
@@ -20,26 +56,50 @@ export default class Header extends React.Component<Props> {
           ['is-transparent']: isTransparent,
         })}
       >
-        <Link to="/proposals" className="Header-button" style={{ display: 'flex' }}>
-          <span className="Header-button-icon">
-            <Icon type="appstore" />
-          </span>
-          <span className="Header-button-text">Explore</span>
-        </Link>
+        <div className="Header-links is-left">
+          <Link to="/proposals" className="Header-links-link">
+            Browse
+          </Link>
+          <Link to="/create" className="Header-links-link">
+            Start a Proposal
+          </Link>
+        </div>
 
         <Link className="Header-title" to="/">
           Grant.io
         </Link>
 
-        <Link to="/create" className="Header-button">
-          <span className="Header-button-icon">
-            <Icon type="form" />
-          </span>
-          <span className="Header-button-text">Start a Proposal</span>
-        </Link>
+        <div className="Header-links is-right">
+          <Link to="/auth/sign-in" className="Header-links-link AuthButton">
+            Sign in
+            {avatar && (
+              <div className="AuthButton-avatar">
+                {avatar}
+                {!isAuthed && (
+                  <div className="AuthButton-avatar-locked">
+                    <Icon type="lock" theme="filled" />
+                  </div>
+                )}
+              </div>
+            )}
+          </Link>
+        </div>
 
         {!isTransparent && <div className="Header-alphaBanner">Alpha</div>}
       </div>
     );
   }
 }
+
+export default connect<StateProps, DispatchProps, OwnProps, AppState>(
+  state => ({
+    web3: state.web3.web3,
+    accounts: state.web3.accounts,
+    accountsLoading: state.web3.accountsLoading,
+    accountsError: state.web3.accountsError,
+  }),
+  {
+    setWeb3: web3Actions.setWeb3,
+    setAccounts: web3Actions.setAccounts,
+  },
+)(Header);
