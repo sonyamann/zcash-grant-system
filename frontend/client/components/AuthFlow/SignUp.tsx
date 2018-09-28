@@ -20,6 +20,7 @@ interface DispatchProps {
 interface OwnProps {
   address: string;
   provider: AUTH_PROVIDER;
+  reset(): void;
 }
 
 type Props = StateProps & DispatchProps & OwnProps;
@@ -41,43 +42,49 @@ class SignUp extends React.PureComponent<Props, State> {
 
     return (
       <div className="SignUp">
-        <div className="SignUp-identity">
-          <Identicon address={address} className="SignUp-identity-identicon" />
-          <ShortAddress address={address} className="SignUp-identity-address" />
+        <div className="SignUp-container">
+          <div className="SignUp-identity">
+            <Identicon address={address} className="SignUp-identity-identicon" />
+            <ShortAddress address={address} className="SignUp-identity-address" />
+          </div>
+
+          <Form className="SignUp-form" onSubmit={this.handleSubmit} layout="vertical">
+            <Form.Item className="SignUp-form-item" label="Display name">
+              <Input
+                name="name"
+                value={name}
+                onChange={this.handleChange}
+                placeholder="Non-unique name that others will see you as"
+                size="large"
+              />
+            </Form.Item>
+
+            <Form.Item className="SignUp-form-item" label="Email address">
+              <Input
+                name="email"
+                value={email}
+                onChange={this.handleChange}
+                placeholder="We promise not to spam you or share your email"
+                size="large"
+              />
+            </Form.Item>
+
+            {}
+            <Button
+              type="primary"
+              htmlType="submit"
+              size="large"
+              block
+              loading={isCreatingUser}
+            >
+              Claim Identity
+            </Button>
+          </Form>
         </div>
 
-        <Form className="SignUp-form" onSubmit={this.handleSubmit} layout="vertical">
-          <Form.Item className="SignUp-form-item" label="Display name">
-            <Input
-              name="name"
-              value={name}
-              onChange={this.handleChange}
-              placeholder="Non-unique name that others will see you as"
-              size="large"
-            />
-          </Form.Item>
-
-          <Form.Item className="SignUp-form-item" label="Email address">
-            <Input
-              name="email"
-              value={email}
-              onChange={this.handleChange}
-              placeholder="We promise not to spam you or share your email"
-              size="large"
-            />
-          </Form.Item>
-
-          {}
-          <Button
-            type="primary"
-            htmlType="submit"
-            size="large"
-            block
-            loading={isCreatingUser}
-          >
-            Claim Identity
-          </Button>
-        </Form>
+        <p className="SignUp-back">
+          Want to use a different identity? <a onClick={this.props.reset}>Click here</a>.
+        </p>
       </div>
     );
   }

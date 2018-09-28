@@ -16,7 +16,7 @@ const PROVIDER_COMPONENTS = {
 interface Props {
   provider: AUTH_PROVIDER;
   onSelectAddress(addr: string): void;
-  resetState(): void;
+  reset(): void;
 }
 
 export default (props: Props) => {
@@ -25,7 +25,7 @@ export default (props: Props) => {
     <div className="ProvideIdentity">
       <ProviderComponent onSelectAddress={props.onSelectAddress} />
       <p className="ProvideIdentity-back">
-        Want to use a different method? <a onClick={props.resetState}>Click here</a>.
+        Want to use a different method? <a onClick={props.reset}>Click here</a>.
       </p>
     </div>
   );

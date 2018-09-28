@@ -39,7 +39,11 @@ class AuthFlow extends React.Component<Props> {
       title: 'Claim your Identity',
       subtitle: 'Create a Grant.io account by claiming your identity',
       render: () => (
-        <SignUp address={this.state.address} provider={this.state.provider} />
+        <SignUp
+          address={this.state.address}
+          provider={this.state.provider}
+          reset={this.resetState}
+        />
       ),
     },
     SELECT_PROVIDER: {
@@ -54,7 +58,7 @@ class AuthFlow extends React.Component<Props> {
         <ProvideIdentity
           provider={this.state.provider}
           onSelectAddress={this.setAddress}
-          resetState={this.resetState}
+          reset={this.resetState}
         />
       ),
     },
