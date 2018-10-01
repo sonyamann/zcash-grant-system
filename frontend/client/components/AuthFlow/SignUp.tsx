@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { Form, Input, Button } from 'antd';
+import { Form, Input, Button, Alert } from 'antd';
 import Identicon from 'components/Identicon';
 import ShortAddress from 'components/ShortAddress';
 import { AUTH_PROVIDER } from 'utils/auth';
@@ -31,7 +31,7 @@ interface State {
   email: string;
 }
 
-class SignUp extends React.PureComponent<Props, State> {
+class SignUp extends React.Component<Props, State> {
   state: State = {
     name: '',
     title: '',
@@ -39,7 +39,7 @@ class SignUp extends React.PureComponent<Props, State> {
   };
 
   render() {
-    const { address, isCreatingUser } = this.props;
+    const { address, isCreatingUser, createUserError } = this.props;
     const { name, title, email } = this.state;
 
     return (
@@ -76,11 +76,9 @@ class SignUp extends React.PureComponent<Props, State> {
                 value={email}
                 onChange={this.handleChange}
                 placeholder="We promise not to spam you or share your email"
-                size="large"
               />
             </Form.Item>
 
-            {}
             <Button
               type="primary"
               htmlType="submit"
@@ -90,6 +88,16 @@ class SignUp extends React.PureComponent<Props, State> {
             >
               Claim Identity
             </Button>
+
+            {createUserError && (
+              <Alert
+                type="error"
+                message={createUserError}
+                showIcon
+                closable
+                style={{ marginTop: '1rem' }}
+              />
+            )}
           </Form>
         </div>
 

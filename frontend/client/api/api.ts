@@ -46,12 +46,22 @@ export function postProposal(payload: {
   });
 }
 
+export function getUser(address: string): Promise<{ data: TeamMember }> {
+  return axios.get(`/api/v1/users/${address}`).then(res => {
+    res.data = formatTeamMemberFromGet(res.data);
+    return res;
+  });
+}
+
 export function createUser(payload: {
   accountAddress: string;
   emailAddress: string;
   displayName: string;
   title: string;
   token: string;
-}) {
-  return axios.post(`/api/v1/users/`, payload);
+}): Promise<{ data: TeamMember }> {
+  return axios.post(`/api/v1/users/`, payload).then(res => {
+    res.data = formatTeamMemberFromGet(res.data);
+    return res;
+  });
 }
