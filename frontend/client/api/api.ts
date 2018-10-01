@@ -1,13 +1,24 @@
 import axios from './axios';
 import { Proposal } from 'modules/proposals/reducers';
+import { TeamMember } from 'modules/create/types';
+import { formatTeamMemberForPost, formatTeamMemberFromGet } from 'utils/api';
 import { PROPOSAL_CATEGORY } from './constants';
 
 export function getProposals(): Promise<{ data: Proposal[] }> {
-  return axios.get('/api/v1/proposals/');
+  return axios.get('/api/v1/proposals/').then(res => {
+    res.data = res.data.map((proposal: any) => {
+      proposal.team = proposal.team.map(formatTeamMemberFromGet);
+      return proposal;
+    });
+    return res;
+  });
 }
 
 export function getProposal(proposalId: number | string): Promise<{ data: Proposal }> {
-  return axios.get(`/api/v1/proposals/${proposalId}`);
+  return axios.get(`/api/v1/proposals/${proposalId}`).then(res => {
+    res.data.team = res.data.team.map(formatTeamMemberFromGet);
+    return res;
+  });
 }
 
 export function getProposalComments(proposalId: number | string) {
@@ -26,9 +37,11 @@ export function postProposal(payload: {
   title: string;
   category: PROPOSAL_CATEGORY;
   milestones: object[];
+  team: TeamMember[];
 }) {
   return axios.post(`/api/v1/proposals/`, {
     ...payload,
-    team: [{ accountAddress: payload.accountAddress }],
+    // Team has a different shape for POST
+    team: payload.team.map(formatTeamMemberForPost),
   });
 }
