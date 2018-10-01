@@ -24,7 +24,7 @@ export function authUser() {
 }
 
 export function createUser(address: string, name: string, email: string) {
-  return async (dispatch: Dispatch<any>, getState: GetState) => {
+  return async (dispatch: Dispatch<any>) => {
     // TODO: Implement user creation
     dispatch({ type: types.CREATE_USER_PENDING });
     await sleep(500);

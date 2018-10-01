@@ -9,6 +9,8 @@ import { AppState } from 'store/reducers';
 import './style.less';
 
 interface StateProps {
+  user: AppState['auth']['user'];
+  isAuthingUser: AppState['auth']['isAuthingUser'];
   web3: AppState['web3']['web3'];
   accounts: AppState['web3']['accounts'];
   accountsLoading: AppState['web3']['accountsLoading'];
@@ -39,13 +41,16 @@ class Header extends React.Component<Props> {
   }
 
   render() {
-    const { isTransparent, accounts, accountsLoading } = this.props;
-    const isAuthed = false;
+    const { isTransparent, accounts, accountsLoading, user, isAuthingUser } = this.props;
+    const isAuthed = !!user;
 
     let avatar;
-    if (accounts && accounts[0]) {
+    if (user) {
+      // TODO: Load user's avatar as well
+      avatar = <Identicon address={user.address} />;
+    } else if (accounts && accounts[0]) {
       avatar = <Identicon address={accounts[0]} />;
-    } else if (accountsLoading) {
+    } else if (accountsLoading || isAuthingUser) {
       avatar = <Spin />;
     }
 
@@ -70,8 +75,11 @@ class Header extends React.Component<Props> {
         </Link>
 
         <div className="Header-links is-right">
-          <Link to="/auth" className="Header-links-link AuthButton">
-            Sign in
+          <Link
+            to={isAuthed ? '/profile' : '/auth'}
+            className="Header-links-link AuthButton"
+          >
+            {isAuthed ? '' : 'Sign in'}
             {avatar && (
               <div className="AuthButton-avatar">
                 {avatar}
@@ -93,6 +101,8 @@ class Header extends React.Component<Props> {
 
 export default connect<StateProps, DispatchProps, OwnProps, AppState>(
   state => ({
+    user: state.auth.user,
+    isAuthingUser: state.auth.isAuthingUser,
     web3: state.web3.web3,
     accounts: state.web3.accounts,
     accountsLoading: state.web3.accountsLoading,
