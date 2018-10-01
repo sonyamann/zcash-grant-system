@@ -2,15 +2,8 @@ import types from './types';
 // TODO: Use a common User type instead of this
 import { TeamMember } from 'modules/create/types';
 
-// TODO: Replace this with full user object once auth is really done
-export interface AuthedUser {
-  name: string;
-  email: string;
-  address: string;
-}
-
 export interface AuthState {
-  user: AuthedUser | null;
+  user: TeamMember | null;
   isAuthingUser: boolean;
   authUserError: string | null;
 
