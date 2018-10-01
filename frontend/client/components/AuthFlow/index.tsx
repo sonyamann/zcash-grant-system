@@ -12,9 +12,7 @@ interface StateProps {
   web3Accounts: AppState['web3']['accounts'];
 }
 
-interface DispatchProps {}
-
-type Props = StateProps & DispatchProps;
+type Props = StateProps;
 
 interface State {
   provider: AUTH_PROVIDER | null;
@@ -125,9 +123,6 @@ class AuthFlow extends React.Component<Props> {
   };
 }
 
-export default connect<StateProps, DispatchProps, {}, AppState>(
-  state => ({
-    web3Accounts: state.web3.accounts,
-  }),
-  {},
-)(AuthFlow);
+export default connect<StateProps, {}, {}, AppState>(state => ({
+  web3Accounts: state.web3.accounts,
+}))(AuthFlow);
