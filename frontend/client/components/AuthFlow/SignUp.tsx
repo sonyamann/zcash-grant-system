@@ -27,18 +27,20 @@ type Props = StateProps & DispatchProps & OwnProps;
 
 interface State {
   name: string;
+  title: string;
   email: string;
 }
 
 class SignUp extends React.PureComponent<Props, State> {
   state: State = {
     name: '',
+    title: '',
     email: '',
   };
 
   render() {
     const { address, isCreatingUser } = this.props;
-    const { name, email } = this.state;
+    const { name, title, email } = this.state;
 
     return (
       <div className="SignUp">
@@ -56,6 +58,15 @@ class SignUp extends React.PureComponent<Props, State> {
                 onChange={this.handleChange}
                 placeholder="Non-unique name that others will see you as"
                 size="large"
+              />
+            </Form.Item>
+
+            <Form.Item className="SignUp-form-item" label="Title">
+              <Input
+                name="title"
+                value={title}
+                onChange={this.handleChange}
+                placeholder="A short description about you, e.g. Core Ethereum Developer"
               />
             </Form.Item>
 
@@ -95,10 +106,10 @@ class SignUp extends React.PureComponent<Props, State> {
   };
 
   private handleSubmit = (ev: React.FormEvent<HTMLFormElement>) => {
-    const { address, createUser } = this.props;
-    const { name, email } = this.state;
     ev.preventDefault();
-    createUser(address, name, email);
+    const { address, createUser } = this.props;
+    const { name, title, email } = this.state;
+    createUser({ address, name, title, email });
   };
 }
 

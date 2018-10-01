@@ -2,6 +2,7 @@ import types from './types';
 import { Dispatch } from 'redux';
 import { sleep } from 'utils/helpers';
 import { AppState } from 'store/reducers';
+import { createUser as apiCreateUser } from 'api/api';
 
 type GetState = () => AppState;
 
@@ -23,22 +24,39 @@ export function authUser() {
   };
 }
 
-export function createUser(address: string, name: string, email: string) {
+export function createUser(user: {
+  address: string;
+  email: string;
+  name: string;
+  title: string;
+}) {
   return async (dispatch: Dispatch<any>) => {
-    // TODO: Implement user creation
     dispatch({ type: types.CREATE_USER_PENDING });
-    await sleep(500);
-    dispatch({
-      type: types.CREATE_USER_FULFILLED,
-      payload: {
-        user: {
-          address,
-          name,
-          email,
+
+    try {
+      // TODO: Pass real token
+      const token = Math.random().toString();
+      await apiCreateUser({
+        accountAddress: user.address,
+        emailAddress: user.email,
+        displayName: user.name,
+        title: user.title,
+        token,
+      });
+      dispatch({
+        type: types.CREATE_USER_FULFILLED,
+        payload: {
+          user,
+          token,
         },
-        token: Math.random(),
-      },
-    });
+      });
+    } catch (err) {
+      dispatch({
+        type: types.CREATE_USER_REJECTED,
+        payload: err.message || err.toString(),
+        error: true,
+      });
+    }
   };
 }
 

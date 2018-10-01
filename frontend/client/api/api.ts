@@ -45,3 +45,13 @@ export function postProposal(payload: {
     team: payload.team.map(formatTeamMemberForPost),
   });
 }
+
+export function createUser(payload: {
+  accountAddress: string;
+  emailAddress: string;
+  displayName: string;
+  title: string;
+  token: string;
+}) {
+  return axios.post(`/api/v1/users/`, payload);
+}
