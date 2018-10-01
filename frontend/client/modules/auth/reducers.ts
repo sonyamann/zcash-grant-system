@@ -66,7 +66,8 @@ export default function createReducer(state: AuthState = INITIAL_STATE, action: 
     case types.CREATE_USER_FULFILLED:
       return {
         ...state,
-        user: action.payload,
+        user: action.payload.user,
+        token: action.payload.token,
         isCreatingUser: false,
       };
     case types.CREATE_USER_REJECTED:

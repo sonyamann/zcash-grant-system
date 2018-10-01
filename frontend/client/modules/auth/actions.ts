@@ -1,7 +1,6 @@
 import types from './types';
 import { Dispatch } from 'redux';
 import { sleep } from 'utils/helpers';
-import { AUTH_PROVIDER, generateAuthMessage } from 'utils/auth';
 import { AppState } from 'store/reducers';
 
 type GetState = () => AppState;
