@@ -8,7 +8,6 @@ export function* authFromToken(): SagaIterator {
   const address: ReturnType<typeof getAuthTokenAddress> = yield select(
     getAuthTokenAddress,
   );
-  console.log(address);
   if (!address) {
     return;
   }
