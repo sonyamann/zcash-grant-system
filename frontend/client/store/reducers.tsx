@@ -11,11 +11,13 @@ import authReducer, {
   INITIAL_STATE as authInitialState,
   authPersistConfig,
 } from 'modules/auth';
+import users, { UsersState, INITIAL_STATE as usersInitialState } from 'modules/users';
 
 export interface AppState {
   proposal: ProposalState;
   web3: Web3State;
   create: CreateState;
+  users: UsersState;
   auth: AuthState;
 }
 
@@ -23,6 +25,7 @@ export const combineInitialState: AppState = {
   proposal: proposalInitialState,
   web3: web3InitialState,
   create: createInitialState,
+  users: usersInitialState,
   auth: authInitialState,
 };
 
@@ -31,4 +34,5 @@ export default combineReducers<AppState>({
   web3,
   create,
   auth: persistReducer(authPersistConfig, authReducer),
+  users,
 });
