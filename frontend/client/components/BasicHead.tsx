@@ -15,12 +15,9 @@ class BasicHead extends React.Component<Props> {
     const { children, title } = this.props;
     const defaultOgpUrl = process.env.PUBLIC_HOST_URL + this.props.location.pathname;
     const defaultOgpImage = urlToPublic(ogpLogo);
-    // TODO: Remove once react-helmet is updated
-    // https://github.com/nfl/react-helmet/issues/373
-    const key = typeof window !== 'undefined' ? window.location.href : 'ssr';
     return (
       <div>
-        <Helmet key={key}>
+        <Helmet>
           <title>{`Grant.io - ${title}`}</title>
           <meta name={`${title} page`} content={`${title} page stuff`} />
           <link
