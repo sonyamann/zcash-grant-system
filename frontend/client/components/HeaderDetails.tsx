@@ -13,8 +13,11 @@ interface Props {
 export default class HeaderDetails extends React.Component<Props> {
   render() {
     const { title, image, url, type, description } = this.props;
+    // TODO: Remove once react-helmet is updated
+    // https://github.com/nfl/react-helmet/issues/373
+    const key = typeof window !== 'undefined' ? window.location.href : 'ssr';
     return (
-      <Helmet>
+      <Helmet key={key}>
         <title>{`Grant.io - ${title}`}</title>
         {/* open graph protocol */}
         {type && <meta property="og:type" content="website" />}
