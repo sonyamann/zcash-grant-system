@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "env": {
+    "BACKEND_URL": "https://grant-stage.herokuapp.com"
+  },
+  "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@now/static-build"
+    }
+  ]
+}

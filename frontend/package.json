@@ -5,6 +5,7 @@
   "license": "MIT",
   "scripts": {
     "analyze": "NODE_ENV=production ANALYZE=true next build ./client",
+    "now-build": "cross-env NODE_ENV=production node bin/build.js",
     "build": "cross-env NODE_ENV=production node bin/build.js",
     "dev": "rm -rf ./node_modules/.cache && cross-env NODE_ENV=development BACKEND_URL=http://localhost:5000 node bin/dev.js",
     "lint": "tslint --project ./tsconfig.json --config ./tslint.json -e \"**/build/**\"",
