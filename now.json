@@ -5,11 +5,7 @@
   },
   "builds": [
     {
-      "src": "frontend/package.json",
-      "use": "@now/static-build"
-    },
-    {
-      "src": "frontend/build/server/server.js",
+      "src": "frontend/bin/now.js",
       "use": "@now/node-server"
     }
   ]
