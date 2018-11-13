@@ -7,6 +7,10 @@
     {
       "src": "frontend/package.json",
       "use": "@now/static-build"
+    },
+    {
+      "src": "frontend/build/server/server.js",
+      "use": "@now/node-server"
     }
   ]
 }
