@@ -2,7 +2,7 @@ matrix:
   include:
     # Frontend
     - language: node_js
-      node_js: 9.4.9
+      node_js: 9.4.0
       before_install:
         - cd frontend/
       install: yarn
