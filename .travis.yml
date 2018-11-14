@@ -2,7 +2,7 @@ matrix:
   include:
     # Frontend
     - language: node_js
-      node_js: 8.11.4
+      node_js: 9.4.9
       before_install:
         - cd frontend/
       install: yarn
@@ -20,7 +20,7 @@ matrix:
         - flask test
     # Contracts
     - language: node_js
-      node_js: 8.11.4
+      node_js: 9.4.0
       before_install:
         - cd contract/
       install: yarn && yarn add global truffle ganache-cli
