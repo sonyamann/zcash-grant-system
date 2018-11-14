@@ -16,6 +16,9 @@
     "truffle": "truffle exec ./bin/init-truffle.js && cd client/lib/contracts && truffle console",
     "storybook": "start-storybook -p 9001 -c .storybook"
   },
+  "engines": {
+    "node": "10.3.0"
+  },
   "husky": {
     "hooks": {
       "pre-commit": "lint-staged",
