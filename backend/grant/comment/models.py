@@ -31,6 +31,7 @@ class Comment(db.Model):
         return Comment.query \
             .options(raiseload(Comment.replies)) \
             .filter(Comment.user_id == user.id) \
+            .order_by(Comment.date_created.desc()) \
             .all()
 
 
@@ -85,7 +86,7 @@ class UserCommentSchema(ma.Schema):
     date_created = ma.Method("get_date_created")
 
     def get_date_created(self, obj):
-        return dt_to_unix(obj.date_created)
+        return dt_to_unix(obj.date_created) * 1000
 
 
 user_comment_schema = UserCommentSchema()

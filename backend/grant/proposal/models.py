@@ -187,10 +187,12 @@ class Proposal(db.Model):
             .filter(proposal_team.c.user_id == user.id) \
             .all()
 
+    @staticmethod
     def get_by_user_contribution(user):
         return Proposal.query \
             .join(ProposalContribution) \
             .filter(ProposalContribution.user_id == user.id) \
+            .order_by(ProposalContribution.date_created.desc()) \
             .all()
 
     def update(
@@ -380,3 +382,30 @@ class ProposalContributionSchema(ma.Schema):
 
 proposal_contribution_schema = ProposalContributionSchema()
 proposals_contribution_schema = ProposalContributionSchema(many=True)
+
+
+class UserProposalSchema(ma.Schema):
+    class Meta:
+        model = Proposal
+        # Fields to expose
+        fields = (
+            "proposal_id",
+            "proposal_address",
+            "title",
+            "brief",
+            "date_created",
+            "team",
+        )
+    date_created = ma.Method("get_date_created")
+    proposal_id = ma.Method("get_proposal_id")
+    team = ma.Nested("UserSchema", many=True)
+
+    def get_proposal_id(self, obj):
+        return obj.id
+
+    def get_date_created(self, obj):
+        return dt_to_unix(obj.date_created) * 1000
+
+
+user_proposal_schema = UserProposalSchema()
+user_proposals_schema = UserProposalSchema(many=True)
