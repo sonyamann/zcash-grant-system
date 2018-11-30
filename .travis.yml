@@ -3,6 +3,7 @@ matrix:
     # Frontend
     - language: node_js
       node_js: 8.13.0
+      cache: yarn
       before_install:
         - cd frontend
       install: yarn
