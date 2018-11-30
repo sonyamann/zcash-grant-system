@@ -92,8 +92,9 @@ const start = async () => {
     process.exit(1);
   });
 
-  script.on('exit', () => {
-    process.exit(0);
+  process.on('SIGINT', () => {
+    console.log(' Dev exited, see you next time.');
+    process.exit();
   });
 };
 
