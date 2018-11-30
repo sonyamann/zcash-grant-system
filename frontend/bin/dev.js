@@ -91,6 +91,10 @@ const start = async () => {
     logMessage('An error occured attempting to run the server. Exiting', 'error');
     process.exit(1);
   });
+
+  script.on('exit', () => {
+    process.exit(0);
+  });
 };
 
 start();
