@@ -7,6 +7,7 @@ import * as bodyParser from 'body-parser';
 import expressWinston from 'express-winston';
 import i18nMiddleware from 'i18next-express-middleware';
 import * as Sentry from '@sentry/node';
+import * as enforce from 'express-sslify';
 
 import '../config/env';
 // @ts-ignore
@@ -25,6 +26,9 @@ Sentry.init({
 });
 
 const app = express();
+
+// ssl
+app.use(enforce.HTTPS());
 
 // sentry
 app.use(Sentry.Handlers.requestHandler());
