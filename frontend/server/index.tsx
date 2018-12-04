@@ -28,7 +28,7 @@ Sentry.init({
 const app = express();
 
 // ssl
-app.use(enforce.HTTPS());
+app.use(enforce.HTTPS({ trustProtoHeader: true }));
 
 // sentry
 app.use(Sentry.Handlers.requestHandler());
