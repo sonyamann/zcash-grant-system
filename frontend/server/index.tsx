@@ -28,7 +28,10 @@ Sentry.init({
 const app = express();
 
 // ssl
-app.use(enforce.HTTPS({ trustProtoHeader: true }));
+if (!isDev) {
+  console.log('Enabling HTTPS redirect.');
+  app.use(enforce.HTTPS({ trustProtoHeader: true }));
+}
 
 // sentry
 app.use(Sentry.Handlers.requestHandler());
