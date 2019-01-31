@@ -171,9 +171,11 @@ export function proposalToContractData(form: ProposalDraft): any {
 
 // This is kind of a disgusting function, sorry.
 export function makeProposalPreviewFromDraft(draft: ProposalDraft): Proposal {
+  const { invites, ...rest } = draft;
   const target = parseFloat(draft.target);
 
   return {
+    ...rest,
     proposalId: 0,
     status: STATUS.DRAFT,
     proposalUrlId: '0-title',
@@ -181,9 +183,6 @@ export function makeProposalPreviewFromDraft(draft: ProposalDraft): Proposal {
     payoutAddress: '0x0',
     dateCreated: Date.now(),
     datePublished: Date.now(),
-    title: draft.title,
-    brief: draft.brief,
-    content: draft.content,
     deadlineDuration: 86400 * 60,
     target: toZat(draft.target),
     funded: Zat('0'),
@@ -191,7 +190,6 @@ export function makeProposalPreviewFromDraft(draft: ProposalDraft): Proposal {
     percentFunded: 0,
     stage: 'preview',
     category: draft.category || PROPOSAL_CATEGORY.DAPP,
-    team: draft.team,
     milestones: draft.milestones.map((m, idx) => ({
       index: idx,
       title: m.title,
