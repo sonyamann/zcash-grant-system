@@ -7,10 +7,12 @@ from grant.milestone.models import Milestone
 from grant.settings import EXPLORER_URL
 from grant.user.models import User
 from grant.utils.auth import requires_auth, requires_team_member_auth, get_authed_user, internal_webhook
+from grant.utils.enums import ProposalStatus, ContributionStatus
 from grant.utils.exceptions import ValidationException
 from grant.utils.misc import is_email, make_url, from_zat, make_preview
-from grant.utils.enums import ProposalStatus, ContributionStatus
 from sqlalchemy import or_
+from webargs import fields
+from webargs.flaskparser import use_args
 
 from .models import (
     Proposal,
@@ -31,7 +33,6 @@ blueprint = Blueprint("proposal", __name__, url_prefix="/api/v1/proposals")
 
 
 @blueprint.route("/<proposal_id>", methods=["GET"])
-@endpoint.api()
 def get_proposal(proposal_id):
     proposal = Proposal.query.filter_by(id=proposal_id).first()
     if proposal:
@@ -48,7 +49,6 @@ def get_proposal(proposal_id):
 
 
 @blueprint.route("/<proposal_id>/comments", methods=["GET"])
-@endpoint.api()
 def get_proposal_comments(proposal_id):
     proposal = Proposal.query.filter_by(id=proposal_id).first()
     if not proposal:
@@ -64,13 +64,18 @@ def get_proposal_comments(proposal_id):
     }
 
 
+comments_POST_args = {
+    "comment": fields.Str(required=True),
+    "parentCommentId": fields.Int(required=False)
+}
+
+
 @blueprint.route("/<proposal_id>/comments", methods=["POST"])
 @requires_auth
-@endpoint.api(
-    parameter('comment', type=str, required=True),
-    parameter('parentCommentId', type=int, required=False)
-)
-def post_proposal_comments(proposal_id, comment, parent_comment_id):
+@use_args(comments_POST_args)
+def post_proposal_comments(args, proposal_id):
+    comment = args.get("comment")
+    parent_comment_id = args.get("parentCommentId")
     # Make sure proposal exists
     proposal = Proposal.query.filter_by(id=proposal_id).first()
     if not proposal:
@@ -161,14 +166,14 @@ def make_proposal_draft():
 def get_proposal_drafts():
     proposals = (
         Proposal.query
-        .filter(or_(
+            .filter(or_(
             Proposal.status == ProposalStatus.DRAFT,
             Proposal.status == ProposalStatus.REJECTED,
         ))
-        .join(proposal_team)
-        .filter(proposal_team.c.user_id == g.current_user.id)
-        .order_by(Proposal.date_created.desc())
-        .all()
+            .join(proposal_team)
+            .filter(proposal_team.c.user_id == g.current_user.id)
+            .order_by(Proposal.date_created.desc())
+            .all()
     )
     return proposals_schema.dump(proposals), 200
 
@@ -368,17 +373,17 @@ def get_proposal_contributions(proposal_id):
 
     top_contributions = ProposalContribution.query \
         .filter_by(
-            proposal_id=proposal_id,
-            status=ContributionStatus.CONFIRMED,
-        ) \
+        proposal_id=proposal_id,
+        status=ContributionStatus.CONFIRMED,
+    ) \
         .order_by(ProposalContribution.amount.desc()) \
         .limit(5) \
         .all()
     latest_contributions = ProposalContribution.query \
         .filter_by(
-            proposal_id=proposal_id,
-            status=ContributionStatus.CONFIRMED,
-        ) \
+        proposal_id=proposal_id,
+        status=ContributionStatus.CONFIRMED,
+    ) \
         .order_by(ProposalContribution.date_created.desc()) \
         .limit(5) \
         .all()

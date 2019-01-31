@@ -6,7 +6,6 @@ from ..config import BaseProposalCreatorConfig
 
 
 class TestTaskAPI(BaseProposalCreatorConfig):
-
     def test_proposal_reminder_task_is_created(self):
         tasks = Task.query.filter(Task.execute_after <= datetime.now()).filter_by(completed=False).all()
         self.assertEqual(tasks, [])
@@ -21,4 +20,3 @@ class TestTaskAPI(BaseProposalCreatorConfig):
         self.app.get("/api/v1/task")
         tasks = Task.query.filter(Task.execute_after <= datetime.now()).filter_by(completed=False).all()
         self.assertEqual(tasks, [])
-

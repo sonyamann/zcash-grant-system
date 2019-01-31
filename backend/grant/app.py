@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """The app module, containing the app factory function."""
 import sentry_sdk
-from flask import Flask
+from flask import Flask, Response, jsonify
 from flask_cors import CORS
 from flask_security import SQLAlchemyUserDatastore
 from flask_sslify import SSLify
@@ -9,10 +9,37 @@ from grant import commands, proposal, user, comment, milestone, admin, email, bl
 from grant.extensions import bcrypt, migrate, db, ma, security
 from grant.settings import SENTRY_RELEASE, ENV
 from sentry_sdk.integrations.flask import FlaskIntegration
+from animal_case import to_snake_case, animalify
+
+
+class JSONResponse(Response):
+    @classmethod
+    def force_type(cls, rv, environ=None):
+        print(rv)
+        if isinstance(rv, dict) or isinstance(rv, list)  or isinstance(rv, tuple):
+            rv = jsonify(animalify(rv))
+        elif rv is None:
+            rv = jsonify(data=None), 204
+
+        return super(JSONResponse, cls).force_type(rv, environ)
 
 
 def create_app(config_objects=["grant.settings"]):
     app = Flask(__name__.split(".")[0])
+    app.response_class = JSONResponse
+    from flask import jsonify
+
+    # Return validation errors as JSON
+    @app.errorhandler(422)
+    @app.errorhandler(400)
+    def handle_error(err):
+        headers = err.data.get("headers", None)
+        messages = err.data.get("messages", ["Invalid request."])
+        if headers:
+            return jsonify({"errors": messages}), err.code, headers
+        else:
+            return jsonify({"errors": messages}), err.code
+
     for conf in config_objects:
         app.config.from_object(conf)
     app.url_map.strict_slashes = False
