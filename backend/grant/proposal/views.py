@@ -1,6 +1,5 @@
 from dateutil.parser import parse
 from flask import Blueprint, g
-from flask_yoloapi import endpoint, parameter
 from grant.comment.models import Comment, comment_schema, comments_schema
 from grant.email.send import send_email
 from grant.milestone.models import Milestone
@@ -199,22 +198,54 @@ def get_proposal_drafts():
     return proposals_schema.dump(proposals), 200
 
 
+proposal_PUT_args = {
+    "title": fields.Str(required=False),
+    "brief": fields.Str(required=False),
+    "category": fields.Str(required=False),
+    "content": fields.Str(required=False),
+    "target": fields.Str(required=False),
+    "payoutAddress": fields.Str(required=False),
+    "deadlineDuration": fields.Int(required=False),
+    "milestones": fields.Nested(
+        {
+            "title": fields.Str(required=True),
+            "content": fields.Str(required=True),
+            "dateEstimated": fields.Str(required=True),  # TODO add validation
+            "payoutPercent": fields.Int(required=True),
+            "immediatePayout": fields.Bool(required=True)
+
+        },
+        required=False,
+        many=True
+    )
+
+}
+
+
 @blueprint.route("/<proposal_id>", methods=["PUT"])
 @requires_team_member_auth
-@endpoint.api(
-    parameter('title', type=str),
-    parameter('brief', type=str),
-    parameter('category', type=str),
-    parameter('content', type=str),
-    parameter('target', type=str),
-    parameter('payoutAddress', type=str),
-    parameter('deadlineDuration', type=int),
-    parameter('milestones', type=list)
-)
-def update_proposal(milestones, proposal_id, **kwargs):
+@use_args(proposal_PUT_args)
+def update_proposal(args, proposal_id):
+    title = args["title"]
+    brief = args["brief"]
+    category = args["category"]
+    content = args["content"]
+    target = args["target"]
+    payout_address = args["payoutAddress"]
+    deadline_duration = args["deadlineDuration"]
+    milestones = args["milestones"]
+
     # Update the base proposal fields
     try:
-        g.current_proposal.update(**kwargs)
+        g.current_proposal.update(
+            title=title,
+            brief=brief,
+            category=category,
+            content=content,
+            target=target,
+            payout_address=payout_address,
+            deadline_duration=deadline_duration
+        )
     except ValidationException as e:
         return {"message": "{}".format(str(e))}, 400
     db.session.add(g.current_proposal)
