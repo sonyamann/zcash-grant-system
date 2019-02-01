@@ -153,7 +153,7 @@ def update_user_password(current_password, password):
     if not g.current_user.check_password(current_password):
         return {"message": "Current password incorrect"}, 403
     g.current_user.set_password(password)
-    return None, 200
+    return {"message": None}, 200
 
 
 @blueprint.route("/me/email", methods=["PUT"])
@@ -167,7 +167,7 @@ def update_user_email(email, password):
         return {"message": "Password is incorrect"}, 403
     print('set_email')
     g.current_user.set_email(email)
-    return None, 200
+    return {"message": None}, 200
 
 
 @blueprint.route("/logout", methods=["POST"])
@@ -175,7 +175,7 @@ def update_user_email(email, password):
 @endpoint.api()
 def logout_user():
     User.logout_current_user()
-    return None, 200
+    return {"message": None}, 200
 
 
 @blueprint.route("/social/<service>/authurl", methods=["GET"])
@@ -225,7 +225,7 @@ def recover_user(email):
     if not existing_user:
         return {"message": "No user exists with that email"}, 400
     existing_user.send_recovery_email()
-    return None, 200
+    return {"message": None}, 200
 
 
 @blueprint.route("/recover/<code>", methods=["POST"])
@@ -240,7 +240,7 @@ def recover_email(code, password):
         er.user.set_password(password)
         db.session.delete(er)
         db.session.commit()
-        return None, 200
+        return {"message": None}, 200
 
     return {"message": "Invalid reset code"}, 400
 
@@ -336,7 +336,7 @@ def respond_to_invite(user_id, invite_id, response):
         db.session.add(invite)
 
     db.session.commit()
-    return None, 200
+    return {"message": None}, 200
 
 
 @blueprint.route("/<user_id>/settings", methods=["GET"])

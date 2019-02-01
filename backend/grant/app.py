@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """The app module, containing the app factory function."""
 import sentry_sdk
+from animal_case import animalify
 from flask import Flask, Response, jsonify
 from flask_cors import CORS
 from flask_security import SQLAlchemyUserDatastore
@@ -9,14 +10,12 @@ from grant import commands, proposal, user, comment, milestone, admin, email, bl
 from grant.extensions import bcrypt, migrate, db, ma, security
 from grant.settings import SENTRY_RELEASE, ENV
 from sentry_sdk.integrations.flask import FlaskIntegration
-from animal_case import to_snake_case, animalify
 
 
 class JSONResponse(Response):
     @classmethod
     def force_type(cls, rv, environ=None):
-        print(rv)
-        if isinstance(rv, dict) or isinstance(rv, list)  or isinstance(rv, tuple):
+        if isinstance(rv, dict) or isinstance(rv, list) or isinstance(rv, tuple):
             rv = jsonify(animalify(rv))
         elif rv is None:
             rv = jsonify(data=None), 204
@@ -30,6 +29,7 @@ def create_app(config_objects=["grant.settings"]):
     from flask import jsonify
 
     # Return validation errors as JSON
+
     @app.errorhandler(422)
     @app.errorhandler(400)
     def handle_error(err):
@@ -68,7 +68,7 @@ def register_extensions(app):
     # supports_credentials for session cookies
     CORS(app, supports_credentials=True)
     SSLify(app)
-    return None
+    return {"message": None}
 
 
 def register_blueprints(app):

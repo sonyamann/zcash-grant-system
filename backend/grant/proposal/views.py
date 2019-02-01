@@ -4,9 +4,9 @@ from flask_yoloapi import endpoint, parameter
 from grant.comment.models import Comment, comment_schema, comments_schema
 from grant.email.send import send_email
 from grant.milestone.models import Milestone
+from grant.rfp.models import RFP
 from grant.settings import EXPLORER_URL
 from grant.user.models import User
-from grant.rfp.models import RFP
 from grant.utils.auth import requires_auth, requires_team_member_auth, get_authed_user, internal_webhook
 from grant.utils.enums import ProposalStatus, ContributionStatus
 from grant.utils.exceptions import ValidationException
@@ -129,11 +129,15 @@ def post_proposal_comments(args, proposal_id):
     return dumped_comment, 201
 
 
+proposal_GET_args = {
+    "stage": fields.Str(required=False)
+}
+
+
 @blueprint.route("/", methods=["GET"])
-@endpoint.api(
-    parameter('stage', type=str, required=False)
-)
-def get_proposals(stage):
+@use_args(proposal_GET_args)
+def get_proposals(args):
+    stage = args.get("stage")
     if stage:
         proposals = (
             Proposal.query.filter_by(status=ProposalStatus.LIVE, stage=stage)
@@ -150,12 +154,16 @@ def get_proposals(stage):
     return dumped_proposals
 
 
+drafts_POST_args = {
+    "rfpId": fields.Int(required=False)
+}
+
+
 @blueprint.route("/drafts", methods=["POST"])
 @requires_auth
-@endpoint.api(
-    parameter('rfpId', type=int),
-)
-def make_proposal_draft(rfp_id):
+@use_args(drafts_POST_args)
+def make_proposal_draft(args):
+    rfp_id = args.get("rfpId")
     proposal = Proposal.create(status=ProposalStatus.DRAFT)
     proposal.team.append(g.current_user)
 
@@ -176,7 +184,6 @@ def make_proposal_draft(rfp_id):
 
 @blueprint.route("/drafts", methods=["GET"])
 @requires_auth
-@endpoint.api()
 def get_proposal_drafts():
     proposals = (
         Proposal.query
@@ -232,7 +239,6 @@ def update_proposal(milestones, proposal_id, **kwargs):
 
 @blueprint.route("/<proposal_id>", methods=["DELETE"])
 @requires_team_member_auth
-@endpoint.api()
 def delete_proposal(proposal_id):
     deleteable_statuses = [
         ProposalStatus.DRAFT,
@@ -245,12 +251,11 @@ def delete_proposal(proposal_id):
         return {"message": "Cannot delete proposals with %s status" % status}, 400
     db.session.delete(g.current_proposal)
     db.session.commit()
-    return None, 202
+    return {"message": None}, 202
 
 
 @blueprint.route("/<proposal_id>/submit_for_approval", methods=["PUT"])
 @requires_team_member_auth
-@endpoint.api()
 def submit_for_approval_proposal(proposal_id):
     try:
         g.current_proposal.submit_for_approval()
@@ -263,7 +268,6 @@ def submit_for_approval_proposal(proposal_id):
 
 @blueprint.route("/<proposal_id>/publish", methods=["PUT"])
 @requires_team_member_auth
-@endpoint.api()
 def publish_proposal(proposal_id):
     try:
         g.current_proposal.publish()
@@ -275,7 +279,6 @@ def publish_proposal(proposal_id):
 
 
 @blueprint.route("/<proposal_id>/updates", methods=["GET"])
-@endpoint.api()
 def get_proposal_updates(proposal_id):
     proposal = Proposal.query.filter_by(id=proposal_id).first()
     if proposal:
@@ -286,7 +289,6 @@ def get_proposal_updates(proposal_id):
 
 
 @blueprint.route("/<proposal_id>/updates/<update_id>", methods=["GET"])
-@endpoint.api()
 def get_proposal_update(proposal_id, update_id):
     proposal = Proposal.query.filter_by(id=proposal_id).first()
     if proposal:
@@ -299,13 +301,18 @@ def get_proposal_update(proposal_id, update_id):
         return {"message": "No proposal matching id"}, 404
 
 
+proposal_updates_POST_args = {
+    "title": fields.Str(required=True),
+    "content": fields.Str(required=True)
+}
+
+
 @blueprint.route("/<proposal_id>/updates", methods=["POST"])
 @requires_team_member_auth
-@endpoint.api(
-    parameter('title', type=str, required=True),
-    parameter('content', type=str, required=True)
-)
-def post_proposal_update(proposal_id, title, content):
+@use_args(proposal_updates_POST_args)
+def post_proposal_update(args, proposal_id):
+    title = args.get("title")
+    content = args.get("content")
     update = ProposalUpdate(
         proposal_id=g.current_proposal.id,
         title=title,
@@ -329,12 +336,16 @@ def post_proposal_update(proposal_id, title, content):
     return dumped_update, 201
 
 
+proposal_invite_POST_args = {
+    "address": fields.Str(required=True),
+}
+
+
 @blueprint.route("/<proposal_id>/invite", methods=["POST"])
 @requires_team_member_auth
-@endpoint.api(
-    parameter('address', type=str, required=True)
-)
-def post_proposal_team_invite(proposal_id, address):
+@use_args(proposal_invite_POST_args)
+def post_proposal_team_invite(args, proposal_id):
+    address = args.get("address")
     invite = ProposalTeamInvite(
         proposal_id=proposal_id,
         address=address
@@ -362,7 +373,6 @@ def post_proposal_team_invite(proposal_id, address):
 
 @blueprint.route("/<proposal_id>/invite/<id_or_address>", methods=["DELETE"])
 @requires_team_member_auth
-@endpoint.api()
 def delete_proposal_team_invite(proposal_id, id_or_address):
     invite = ProposalTeamInvite.query.filter(
         (ProposalTeamInvite.id == id_or_address) |
@@ -375,11 +385,10 @@ def delete_proposal_team_invite(proposal_id, id_or_address):
 
     db.session.delete(invite)
     db.session.commit()
-    return None, 202
+    return {"message": None}, 202
 
 
 @blueprint.route("/<proposal_id>/contributions", methods=["GET"])
-@endpoint.api()
 def get_proposal_contributions(proposal_id):
     proposal = Proposal.query.filter_by(id=proposal_id).first()
     if not proposal:
@@ -409,7 +418,6 @@ def get_proposal_contributions(proposal_id):
 
 
 @blueprint.route("/<proposal_id>/contributions/<contribution_id>", methods=["GET"])
-@endpoint.api()
 def get_proposal_contribution(proposal_id, contribution_id):
     proposal = Proposal.query.filter_by(id=proposal_id).first()
     if proposal:
@@ -422,12 +430,16 @@ def get_proposal_contribution(proposal_id, contribution_id):
         return {"message": "No proposal matching id"}, 404
 
 
+proposal_contributions_POST_args = {
+    "amount": fields.Str(required=True),
+}
+
+
 @blueprint.route("/<proposal_id>/contributions", methods=["POST"])
 @requires_auth
-@endpoint.api(
-    parameter('amount', type=str, required=True)
-)
-def post_proposal_contribution(proposal_id, amount):
+@use_args(proposal_contributions_POST_args)
+def post_proposal_contribution(args, proposal_id):
+    amount = args.get("amount")
     proposal = Proposal.query.filter_by(id=proposal_id).first()
     if not proposal:
         return {"message": "No proposal matching id"}, 404
@@ -450,15 +462,21 @@ def post_proposal_contribution(proposal_id, amount):
     return dumped_contribution, code
 
 
+proposal_contributions_confirm_POST_args = {
+    "to": fields.Str(required=True),
+    "amount": fields.Str(required=True),
+    "txid": fields.Str(required=True),
+}
+
+
 # Can't use <proposal_id> since webhook doesn't know proposal id
 @blueprint.route("/contribution/<contribution_id>/confirm", methods=["POST"])
 @internal_webhook
-@endpoint.api(
-    parameter('to', type=str, required=True),
-    parameter('amount', type=str, required=True),
-    parameter('txid', type=str, required=True),
-)
-def post_contribution_confirmation(contribution_id, to, amount, txid):
+@use_args(proposal_contributions_confirm_POST_args)
+def post_contribution_confirmation(args, contribution_id):
+    to = args.get("to")
+    amount = args.get("amount")
+    txid = args.get("txid")
     contribution = ProposalContribution.query.filter_by(
         id=contribution_id).first()
 
@@ -469,7 +487,7 @@ def post_contribution_confirmation(contribution_id, to, amount, txid):
 
     if contribution.status == ContributionStatus.CONFIRMED:
         # Duplicates can happen, just return ok
-        return None, 200
+        return {"message": None}, 200
 
     # Convert to whole zcash coins from zats
     zec_amount = str(from_zat(int(amount)))
@@ -499,12 +517,11 @@ def post_contribution_confirmation(contribution_id, to, amount, txid):
     # TODO: Once we have a task queuer in place, queue emails to everyone
     # on funding target reached. 
 
-    return None, 200
+    return {"message": None}, 200
 
 
 @blueprint.route("/contribution/<contribution_id>", methods=["DELETE"])
 @requires_auth
-@endpoint.api()
 def delete_proposal_contribution(contribution_id):
     contribution = contribution = ProposalContribution.query.filter_by(
         id=contribution_id).first()
@@ -520,4 +537,4 @@ def delete_proposal_contribution(contribution_id):
     contribution.status = ContributionStatus.DELETED
     db.session.add(contribution)
     db.session.commit()
-    return None, 202
+    return {"message": None}, 202

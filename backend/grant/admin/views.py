@@ -24,7 +24,7 @@ blueprint = Blueprint('admin', __name__, url_prefix='/api/v1/admin')
 
 @blueprint.route("/checklogin", methods=["GET"])
 @endpoint.api()
-def loggedin():
+def logged_in():
     return {"isLoggedIn": admin_is_authed()}
 
 
@@ -265,4 +265,4 @@ def delete_rfp(rfp_id):
 
     db.session.delete(rfp)
     db.session.commit()
-    return None, 200
+    return {"message": None}, 200
